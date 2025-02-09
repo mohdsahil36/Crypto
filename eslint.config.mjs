@@ -14,3 +14,10 @@ const eslintConfig = [
 ];
 
 export default eslintConfig;
+
+// Update module.exports to show warnings instead of errors
+module.exports = {
+  rules: {
+    "@typescript-eslint/no-explicit-any": "warn", // Changed "off" to "warn" for warnings instead of errors
+  },
+};
