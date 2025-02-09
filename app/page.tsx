@@ -2,7 +2,7 @@
 import React from 'react';
 import { Spotlight } from './ui-components/spotlight-new';
 import { FlipWords } from './ui-components/flip-words';
-import { Button } from './ui-components/moving-border';
+import { HoverBorderGradient } from './ui-components/moving-border';
 import { ArrowRight } from 'lucide-react';
 
 export default function Home() {
@@ -18,14 +18,16 @@ export default function Home() {
           <p className="mt-4 font-normal text-md md:text-lg text-neutral-300 max-w-lg text-center mx-auto">
             Advanced users stay ahead of the market by exploring real-time data, trends, and insights on a seamless platform
           </p>
-          <div className='text-center mt-8 md:mt-10'>
-            <Button
-              className="bg-white dark:bg-black dark:hover:bg-zinc-800 ease-in-out duration-500 text-black dark:text-white border-neutral-200 dark:border-slate-800 flex gap-x-2"
+          <div className="md:mt-10 flex justify-center text-center">
+            <HoverBorderGradient
+              containerClassName="rounded-full"
+              as="button"
+              className="dark:bg-black bg-white text-black dark:text-white flex items-center space-x-2"
             >
-              Dashboard
-              <ArrowRight size={18}/>
-            </Button>
-        </div>
+              <span>Dashboard</span>
+              <ArrowRight size={15}/> 
+            </HoverBorderGradient>
+          </div>
         </div>
       </div>
     </div>

@@ -1,136 +1,99 @@
 "use client";
-import React from "react";
-import {
-  motion,
-  useAnimationFrame,
-  useMotionTemplate,
-  useMotionValue,
-  useTransform,
-} from "framer-motion";
-import { useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
+
+import { motion } from "framer-motion";
 import { cn } from "../store/utils";
 
-export function Button({
-  borderRadius = "1.75rem",
+type Direction = "TOP" | "LEFT" | "BOTTOM" | "RIGHT";
+
+export function HoverBorderGradient({
   children,
-  as: Component = "button",
   containerClassName,
-  borderClassName,
-  duration,
   className,
-  ...otherProps
-}: {
-  borderRadius?: string;
-  children: React.ReactNode;
-  as?: any;
-  containerClassName?: string;
-  borderClassName?: string;
-  duration?: number;
-  className?: string;
-  [key: string]: any;
-}) {
+  as: Tag = "button",
+  duration = 1,
+  clockwise = true,
+  ...props
+}: React.PropsWithChildren<
+  {
+    as?: React.ElementType;
+    containerClassName?: string;
+    className?: string;
+    duration?: number;
+    clockwise?: boolean;
+  } & React.HTMLAttributes<HTMLElement>
+>) {
+  const [hovered, setHovered] = useState<boolean>(false);
+  const [direction, setDirection] = useState<Direction>("TOP");
+
+  const rotateDirection = (currentDirection: Direction): Direction => {
+    const directions: Direction[] = ["TOP", "LEFT", "BOTTOM", "RIGHT"];
+    const currentIndex = directions.indexOf(currentDirection);
+    const nextIndex = clockwise
+      ? (currentIndex - 1 + directions.length) % directions.length
+      : (currentIndex + 1) % directions.length;
+    return directions[nextIndex];
+  };
+
+  const movingMap: Record<Direction, string> = {
+    TOP: "radial-gradient(20.7% 50% at 50% 0%, hsl(0, 0%, 100%) 0%, rgba(255, 255, 255, 0) 100%)",
+    LEFT: "radial-gradient(16.6% 43.1% at 0% 50%, hsl(0, 0%, 100%) 0%, rgba(255, 255, 255, 0) 100%)",
+    BOTTOM:
+      "radial-gradient(20.7% 50% at 50% 100%, hsl(0, 0%, 100%) 0%, rgba(255, 255, 255, 0) 100%)",
+    RIGHT:
+      "radial-gradient(16.2% 41.199999999999996% at 100% 50%, hsl(0, 0%, 100%) 0%, rgba(255, 255, 255, 0) 100%)",
+  };
+
+  const highlight =
+    "radial-gradient(75% 181.15942028985506% at 50% 50%, #3275F8 0%, rgba(255, 255, 255, 0) 100%)";
+
+  useEffect(() => {
+    if (!hovered) {
+      const interval = setInterval(() => {
+        setDirection((prevState) => rotateDirection(prevState));
+      }, duration * 1000);
+      return () => clearInterval(interval);
+    }
+  }, [hovered]);
   return (
-    <Component
+    <Tag
+      onMouseEnter={(event: React.MouseEvent<HTMLDivElement>) => {
+        setHovered(true);
+      }}
+      onMouseLeave={() => setHovered(false)}
       className={cn(
-        "bg-transparent relative text-xl h-16 w-40 p-[1px] overflow-hidden ",
+        "relative flex rounded-full  content-center bg-black/20 hover:bg-black/10 transition duration-500 dark:bg-white/20 items-center flex-col flex-nowrap gap-10 h-min justify-center overflow-visible p-px decoration-clone w-fit",
         containerClassName
       )}
-      style={{
-        borderRadius: borderRadius,
-      }}
-      {...otherProps}
+      {...props}
     >
       <div
-        className="absolute inset-0"
-        style={{ borderRadius: `calc(${borderRadius} * 0.96)` }}
-      >
-        <MovingBorder duration={duration} rx="30%" ry="30%">
-          <div
-            className={cn(
-              "h-20 w-20 opacity-[0.8] bg-[radial-gradient(hsl(0,0%,75%)_40%,transparent_60%)]",
-              borderClassName
-            )}
-          />
-        </MovingBorder>
-      </div>
-
-      <div
         className={cn(
-          "relative bg-slate-900/[0.8] border border-slate-800 backdrop-blur-xl text-white flex items-center justify-center w-full h-full text-sm antialiased rounded-full",
+          "w-auto text-white z-10 bg-black px-6 py-3 rounded-[inherit]",
           className
         )}
       >
         {children}
       </div>
-    </Component>
+      <motion.div
+        className={cn(
+          "flex-none inset-0 overflow-hidden absolute z-0 rounded-[inherit]"
+        )}
+        style={{
+          filter: "blur(2px)",
+          position: "absolute",
+          width: "100%",
+          height: "100%",
+        }}
+        initial={{ background: movingMap[direction] }}
+        animate={{
+          background: hovered
+            ? [movingMap[direction], highlight]
+            : movingMap[direction],
+        }}
+        transition={{ ease: "linear", duration: duration ?? 1 }}
+      />
+      <div className="bg-black absolute z-1 flex-none inset-[2px] rounded-[100px]" />
+    </Tag>
   );
 }
-
-export const MovingBorder = ({
-  children,
-  duration = 2000,
-  rx,
-  ry,
-  ...otherProps
-}: {
-  children: React.ReactNode;
-  duration?: number;
-  rx?: string;
-  ry?: string;
-  [key: string]: any;
-}) => {
-  const pathRef = useRef<any>();
-  const progress = useMotionValue<number>(0);
-
-  useAnimationFrame((time) => {
-    const length = pathRef.current?.getTotalLength();
-    if (length) {
-      const pxPerMillisecond = length / duration;
-      progress.set((time * pxPerMillisecond) % length);
-    }
-  });
-
-  const x = useTransform(
-    progress,
-    (val) => pathRef.current?.getPointAtLength(val).x
-  );
-  const y = useTransform(
-    progress,
-    (val) => pathRef.current?.getPointAtLength(val).y
-  );
-
-  const transform = useMotionTemplate`translateX(${x}px) translateY(${y}px) translateX(-50%) translateY(-50%)`;
-
-  return (
-    <>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        preserveAspectRatio="none"
-        className="absolute h-full w-full"
-        width="100%"
-        height="100%"
-        {...otherProps}
-      >
-        <rect
-          fill="none"
-          width="100%"
-          height="100%"
-          rx={rx}
-          ry={ry}
-          ref={pathRef}
-        />
-      </svg>
-      <motion.div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          display: "inline-block",
-          transform,
-        }}
-      >
-        {children}
-      </motion.div>
-    </>
-  );
-};
