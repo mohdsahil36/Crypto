@@ -16,8 +16,8 @@ export default function useCryptoData(url:string){
                 const data=await response.json();
                 setData(data); 
             }
-            catch(err){
-                setError(err);
+            catch{
+                setError("Some unexpected error occured!");
             }
             finally{
                 setisLoading(false);
