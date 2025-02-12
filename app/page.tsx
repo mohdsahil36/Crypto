@@ -4,6 +4,7 @@ import { Spotlight } from './ui-components/spotlight-new';
 import { FlipWords } from './ui-components/flip-words';
 import { HoverBorderGradient } from './ui-components/moving-border';
 import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
   const words = ["Simplified for Clarity", "Done with Ease", "Without the Guesswork"];
@@ -24,7 +25,9 @@ export default function Home() {
               as="button"
               className="dark:bg-black bg-white text-black dark:text-white flex items-center space-x-2"
             >
-              <span>Dashboard</span>
+              <Link href='/dashboard'>
+                <span>Dashboard</span>
+              </Link>
               <ArrowRight size={15}/> 
             </HoverBorderGradient>
           </div>
